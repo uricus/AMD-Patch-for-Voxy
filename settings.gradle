@@ -1,0 +1,28 @@
+pluginManagement {
+    repositories {
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
+        maven {
+            name = 'NeoForged'
+            url = 'https://maven.neoforged.net/releases/'
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+plugins {
+    // Lets Gradle auto-provision JDK 21 for compilation even if you're running
+    // Gradle itself on a newer JDK (e.g. 25).
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.9.0'
+}
+
+rootProject.name = 'amd_patch_for_voxy'
+
+include 'fabric'
+project(':fabric').projectDir = file('versions/fabric')
+
+include 'neoforge'
+project(':neoforge').projectDir = file('versions/neoforge')

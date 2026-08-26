@@ -1,0 +1,117 @@
+plugins {
+    id 'net.neoforged.moddev' version '2.0.78'
+    id 'maven-publish'
+}
+
+version = "${project.mod_version}+${project.minecraft_version}-neoforge"
+group = project.maven_group
+
+base {
+    archivesName = "${project.archives_base_name}"
+}
+
+// Pull in the shared (loader-agnostic) sources and resources from /common
+sourceSets {
+    main {
+        java {
+            srcDir rootProject.file('common/src/main/java')
+        }
+        resources {
+            srcDir rootProject.file('common/src/main/resources')
+        }
+    }
+}
+
+neoForge {
+    version = project.neoforge_version
+
+    // Client-only mod: no server-side dedicated run needed, but keep the
+    // client run configured for local testing.
+    runs {
+        client {
+            client()
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+        }
+    }
+}
+
+def voxyJars = fileTree(dir: 'libs', include: ['voxy*neoforge*.jar', 'voxy*.jar'])
+tasks.matching { it.name == 'compileJava' }.configureEach {
+    doFirst {
+        if (voxyJars.isEmpty()) {
+            // \u001B[31m / \u001B[0m are ANSI codes that color this message red in
+            // Gradle's rich console, matching the FAILURE/BUILD FAILED lines around it.
+            // Terminals without ANSI support just show the raw text — harmless either way.
+            throw new GradleException(
+                "\u001B[31m" +
+                "No voxy jar found in versions/neoforge/libs/. Download and build the Voxy Backport (NeoForge) " +
+                "from https://github.com/m3t4f1v3/voxy/tree/multiversion " +
+                "and place the jar in versions/neoforge/libs/ before building. See README.md." +
+                "\u001B[0m"
+            )
+        }
+    }
+}
+
+dependencies {
+    // Compile-only: we patch Voxy's class at runtime, we never bundle it.
+    // NeoForge uses official Mojang mappings directly, so no remapping step is needed
+    // for this compile-only dependency, unlike Fabric.
+    compileOnly voxyJars
+}
+
+def expandProps = [
+    "version": mod_version,
+    "mod_id": mod_id,
+    "minecraft_version_range": minecraft_version_range,
+    "neoforge_loader_version_range": neoforge_loader_version_range,
+    "voxy_min_version": voxy_min_version
+]
+
+processResources {
+    inputs.property "version", project.version
+    filesMatching("META-INF/neoforge.mods.toml") {
+        expand expandProps
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 21
+}
+
+java {
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+tasks.withType(Jar).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+jar {
+    inputs.property "archivesName", project.base.archivesName
+    from(rootProject.file("LICENSE")) {
+        rename { "${it}_${inputs.properties.archivesName}" }
+    }
+}
+
+publishing {
+    publications {
+        create("mavenJava", MavenPublication) {
+            artifactId = project.base.archivesName.get()
+            from components.java
+        }
+    }
+    repositories {
+        // Add publishing repositories here if needed.
+    }
+}

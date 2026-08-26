@@ -1,0 +1,27 @@
+{
+	"schemaVersion": 1,
+	"id": "${mod_id}",
+	"version": "${version}",
+	"name": "AMD Patch for Voxy",
+	"description": "Fixes rendering issues on AMD GPUs for Voxy (LOD terrain disappearing/not loading).",
+	"authors": [
+		"uricus"
+	],
+	"license": "GPL-3.0-only",
+	"icon": "assets/amd_patch_for_voxy/icon.png",
+	"environment": "client",
+	"entrypoints": {},
+	"mixins": [
+		{
+			"config": "amd_patch_for_voxy.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"java": ">=21",
+		"fabricloader": ">=0.16",
+		"fabric-api": "*",
+		"minecraft": "~1.21.1",
+		"voxy": ">=${voxy_min_version}"
+	}
+}

@@ -1,0 +1,35 @@
+modLoader = "javafml"
+loaderVersion = "${neoforge_loader_version_range}"
+license = "GPL-3.0-only"
+
+[[mixins]]
+config = "amd_patch_for_voxy.mixins.json"
+
+[[mods]]
+modId = "${mod_id}"
+version = "${version}"
+displayName = "AMD Patch for Voxy"
+description = '''Fixes rendering issues on AMD GPUs for Voxy (LOD terrain disappearing/not loading).'''
+authors = "uricus"
+logoFile = "amd_patch_for_voxy_icon.png"
+
+[[dependencies.amd_patch_for_voxy]]
+    modId = "neoforge"
+    type = "required"
+    versionRange = "${neoforge_loader_version_range}"
+    ordering = "NONE"
+    side = "CLIENT"
+
+[[dependencies.amd_patch_for_voxy]]
+    modId = "minecraft"
+    type = "required"
+    versionRange = "${minecraft_version_range}"
+    ordering = "NONE"
+    side = "CLIENT"
+
+[[dependencies.amd_patch_for_voxy]]
+    modId = "voxy"
+    type = "required"
+    versionRange = "[${voxy_min_version},)"
+    ordering = "AFTER"
+    side = "CLIENT"
